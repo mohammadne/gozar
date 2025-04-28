@@ -6,11 +6,11 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 
-	"github.com/mohammadne/hello-world/cmd"
+	"github.com/mohammadne/gozar/cmd"
 )
 
 func main() {
-	const description = "HelloWorld is an xray utility program which helps you send hello packet to the world"
+	const description = "Gozar is an xray utility program which helps you send hello packet to the world"
 	root := &cobra.Command{Short: description}
 
 	root.AddCommand(

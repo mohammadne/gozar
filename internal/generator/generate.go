@@ -7,8 +7,8 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/mohammadne/hello-world/internal/entities"
-	"github.com/mohammadne/hello-world/pkg/cryptography"
+	"github.com/mohammadne/gozar/internal/entities"
+	"github.com/mohammadne/gozar/pkg/cryptography"
 )
 
 type Generator struct {

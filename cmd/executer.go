@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/manifoldco/promptui"
-	"github.com/mohammadne/hello-world/internal/entities"
-	"github.com/mohammadne/hello-world/internal/generator"
-	"github.com/mohammadne/hello-world/pkg/validator"
+	"github.com/mohammadne/gozar/internal/entities"
+	"github.com/mohammadne/gozar/internal/generator"
+	"github.com/mohammadne/gozar/pkg/validator"
 	"github.com/spf13/cobra"
 )
 

@@ -8,7 +8,7 @@ Configure Xray proxy to bypass filtering and send a hello packet to the world.
 
 ```sh
 # clone the repository
-git clone ssh://git@github.com/mohammadne/hello-world
+git clone ssh://git@github.com/mohammadne/gozar
 
 # run setup script to configure the and install the required tools
 ./scripts/setup.sh
