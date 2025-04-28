@@ -1,6 +1,8 @@
 services:
-  xray:
+  xray-{{ .Protocol }}:
     build: .
     ports:
       - "{{ .Port }}:{{ .Port }}"
     restart: always
+  volumes:
+    - /usr/local/xray/config:./{{ .Protocol }}.json

@@ -12,46 +12,53 @@ import (
 )
 
 const (
-	defaultXrayVersion     = "v1.8.11"
+	defaultXrayVersion     = "v25.3.6"
 	defaultOutputDirectory = "outputs"
-	defaultServerPort      = 443
-	defaultClientPort      = 10809
 )
 
-type Executer struct {
-	outputDirectory string
-
-	serverAddress string
-	serverPort    int
-	clientPort    int
-
-	// ask from the user
-	version  string
-	protocol entities.Protocol
+var defaultPorts = map[entities.Protocol]map[entities.Machine]int{
+	entities.NoTLS: {
+		entities.Client: 10808,
+		entities.Server: 1443,
+	},
+	entities.Reality: {
+		entities.Client: 10809,
+		entities.Server: 443,
+	},
 }
 
-func (executer Executer) Command() *cobra.Command {
+type Executer struct {
+	// arguments
+	outputDirectory string
+	version         string
+
+	// ask from the user
+	serverAddress string
+	protocol      entities.Protocol
+}
+
+func (e Executer) Command() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "executer",
 		Short: "execute the program and generate the configuration files based on given prompts",
 		Run: func(_ *cobra.Command, _ []string) {
-			executer.selectProtocol()
-			executer.promptServerDomainOrIP()
+			e.selectProtocol()
+			e.promptServerDomainOrIP()
 
 			generator.Generator{
-				Protocol:      executer.protocol,
-				Version:       executer.version,
-				ServerAddress: executer.serverAddress,
-				ServerPort:    executer.serverPort,
-				ClientPort:    executer.clientPort,
-			}.Run(executer.outputDirectory)
+				Protocol:      e.protocol,
+				Version:       e.version,
+				ServerAddress: e.serverAddress,
+				ServerPort:    defaultPorts[e.protocol][entities.Server],
+				ClientPort:    defaultPorts[e.protocol][entities.Client],
+			}.Run(e.outputDirectory)
 		},
 	}
 
-	cmd.Flags().StringVar(&executer.version, "xray-version", defaultXrayVersion, "The xray-core version")
-	cmd.Flags().StringVar(&executer.outputDirectory, "output-directory", defaultOutputDirectory, "The output directory for generated files")
-	cmd.Flags().IntVar(&executer.serverPort, "server-port", defaultServerPort, "The port server exposed from")
-	cmd.Flags().IntVar(&executer.clientPort, "client-port", defaultClientPort, "The port client exposed from")
+	cmd.Flags().StringVar(&e.version, "xray-version", defaultXrayVersion, "The xray-core version")
+	cmd.Flags().StringVar(&e.outputDirectory, "output-directory", defaultOutputDirectory, "The output directory for generated files")
+	// cmd.Flags().IntVar(&executer.serverPort, "server-port", defaultRealityServerPort, "The port server exposed from")
+	// cmd.Flags().IntVar(&executer.clientPort, "client-port", defaultRealityClientPort, "The port client exposed from")
 
 	return cmd
 }
@@ -60,6 +67,7 @@ func (executer *Executer) selectProtocol() {
 	prompt := promptui.Select{
 		Label: "Select which Xray protocol you want for your configuration",
 		Items: []entities.Protocol{
+			entities.NoTLS,
 			entities.Reality,
 		},
 	}
@@ -77,7 +85,7 @@ func (executer *Executer) selectProtocol() {
 func (executer *Executer) promptServerDomainOrIP() {
 	validate := func(input string) error {
 		if validator.ValidateIP(input) != nil && validator.ValidateDomain(input) != nil {
-			return errors.New("Invalid Domain or IP has been given")
+			return errors.New("invalid Domain or IP has been given")
 		}
 		return nil
 	}

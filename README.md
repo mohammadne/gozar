@@ -1,4 +1,4 @@
-# Hello World
+# Gozar
 
 Configure Xray proxy to bypass filtering and send a hello packet to the world.
 

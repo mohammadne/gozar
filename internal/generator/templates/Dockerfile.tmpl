@@ -1,4 +1,4 @@
-FROM alpine:3.19.1
+FROM alpine:3.20.2
 
 RUN apk --no-cache add wget unzip
 
@@ -9,8 +9,6 @@ RUN wget https://github.com/XTLS/Xray-core/releases/download/{{ .XrayVersion }}/
 && rm Xray-linux-64.zip
 
 WORKDIR $XRAY_DIRECTORY
-
-COPY config.json config.json
 
 ENTRYPOINT ["./xray"]
 CMD ["run", "-c", "./config.json"]

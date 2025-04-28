@@ -61,7 +61,7 @@ func (generator Generator) Run(outputDirectory string) {
 
 		generator.generateDockerfile(machine)
 		generator.generateConfig(machine)
-		generator.generateDockerCompose(machine)
+		generator.generateCompose(machine)
 	}
 }
 
@@ -99,17 +99,17 @@ func (generator *Generator) generateDockerfile(machine entities.Machine) {
 }
 
 const (
-	ConfigServerTemplateFile = "config-server.json.tmpl"
-	ConfigClientTemplateFile = "config-client.json.tmpl"
-	ConfigOutputFile         = "config.json"
+	ServerTemplateConfigFile = "%s-server.json.tmpl"
+	ClientTemplateConfigFile = "%s-client.json.tmpl"
+	OutputConfigFile         = "%s.json"
 )
 
-func (generator *Generator) generateConfig(machine entities.Machine) {
+func (g *Generator) generateConfig(machine entities.Machine) {
 	var templateFile string
 	if machine == entities.Server {
-		templateFile = TemplatesDirectory + ConfigServerTemplateFile
+		templateFile = TemplatesDirectory + fmt.Sprintf(ServerTemplateConfigFile, g.Protocol)
 	} else {
-		templateFile = TemplatesDirectory + ConfigClientTemplateFile
+		templateFile = TemplatesDirectory + fmt.Sprintf(ClientTemplateConfigFile, g.Protocol)
 	}
 
 	tmpl, err := template.ParseFS(templates, templateFile)
@@ -118,7 +118,7 @@ func (generator *Generator) generateConfig(machine entities.Machine) {
 	}
 
 	var outputFile *os.File
-	outputFile, err = os.Create(generator.outputPath(machine) + ConfigOutputFile)
+	outputFile, err = os.Create(g.outputPath(machine) + fmt.Sprintf(OutputConfigFile, g.Protocol))
 	if err != nil {
 		panic(err)
 	}
@@ -131,9 +131,9 @@ func (generator *Generator) generateConfig(machine entities.Machine) {
 			UUID       string
 			PrivateKey string
 		}{
-			Port:       generator.ServerPort,
-			UUID:       generator.uuid,
-			PrivateKey: generator.keyPair.PrivateKey,
+			Port:       g.ServerPort,
+			UUID:       g.uuid,
+			PrivateKey: g.keyPair.PrivateKey,
 		}
 	} else {
 		values = struct {
@@ -143,11 +143,11 @@ func (generator *Generator) generateConfig(machine entities.Machine) {
 			UUID          string
 			PublicKey     string
 		}{
-			ClientPort:    generator.ClientPort,
-			ServerAddress: generator.ServerAddress,
-			ServerPort:    generator.ServerPort,
-			UUID:          generator.uuid,
-			PublicKey:     generator.keyPair.PublicKey,
+			ClientPort:    g.ClientPort,
+			ServerAddress: g.ServerAddress,
+			ServerPort:    g.ServerPort,
+			UUID:          g.uuid,
+			PublicKey:     g.keyPair.PublicKey,
 		}
 	}
 
@@ -157,33 +157,34 @@ func (generator *Generator) generateConfig(machine entities.Machine) {
 }
 
 const (
-	DockerComposeTemplateFile = "docker-compose.yml.tmpl"
-	DockerComposeOutputFile   = "docker-compose.yml"
+	ComposeTemplateFile = "compose.yml.tmpl"
+	ComposeOutputFile   = "compose-%s.yml"
 )
 
-func (generator *Generator) generateDockerCompose(machine entities.Machine) {
-	templateFile := TemplatesDirectory + DockerComposeTemplateFile
+type ComposeValues struct {
+	Port     int
+	Machine  string
+	Protocol string
+}
+
+func (g *Generator) generateCompose(machine entities.Machine) {
+	templateFile := TemplatesDirectory + ComposeTemplateFile
 	tmpl, err := template.ParseFS(templates, templateFile)
 	if err != nil {
 		panic(err)
 	}
 
-	// var values any
-
-	// values := struct{ Port int }{Port: generator.ClientPort}
-	// if machine == entities.Server {
-	// 	values.Port = generator.ServerPort
-	// }
-
-	var values struct{ Port int }
+	var values ComposeValues
+	values.Machine = string(machine)
+	values.Protocol = string(g.Protocol)
 	if machine == entities.Server {
-		values = struct{ Port int }{Port: generator.ServerPort}
+		values.Port = g.ServerPort
 	} else {
-		values = struct{ Port int }{Port: generator.ClientPort}
+		values.Port = g.ClientPort
 	}
 
 	var outputFile *os.File
-	outputFile, err = os.Create(generator.outputPath(machine) + DockerComposeOutputFile)
+	outputFile, err = os.Create(g.outputPath(machine) + fmt.Sprintf(ComposeOutputFile, g.Protocol))
 	if err != nil {
 		panic(err)
 	}

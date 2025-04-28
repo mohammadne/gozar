@@ -11,8 +11,11 @@ const (
 )
 
 func ValidateMachine(rawMachine string) error {
-	if machine := Machine(rawMachine); machine == Client || machine == Server {
+	switch Machine(rawMachine) {
+	case Client:
+		return nil
+	case Server:
 		return nil
 	}
-	return errors.New("Invalid machine type")
+	return errors.New("invalid machine type")
 }
