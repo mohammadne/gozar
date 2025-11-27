@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	defaultXrayVersion     = "v25.3.6"
+	defaultXrayVersion     = "v25.10.15"
 	defaultOutputDirectory = "outputs"
 )
 
